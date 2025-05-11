@@ -1,0 +1,44 @@
+{
+  "pageName": "tenants",
+  "layout": {
+    "header": {
+      "title": "TENANTS",
+      "showBackButton": true
+    },
+    "widgets": [
+      {
+        "type": "Text",
+        "text": "Welcome to tenants",
+        "style": "headline"
+      },
+      {
+        "type": "Image",
+        "src": "/assets/sample-image.png",
+        "alt": "tenants image"
+      },
+      {
+        "type": "Button",
+        "label": "Next",
+        "action": "navigate:/home"
+      }
+    ],
+    "footer": {
+      "copyright": "© 2025 SmartHome Inc.",
+      "links": [
+        {
+          "label": "Privacy Policy",
+          "action": "navigate:/privacy-policy"
+        },
+        {
+          "label": "Terms of Service",
+          "action": "navigate:/terms-of-service"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "createdBy": "Auto-Generated Script",
+    "createdAt": "2025-05-11T15:43:54.963Z",
+    "version": "1.0.0"
+  }
+}

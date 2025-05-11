@@ -1,5 +1,4 @@
-{
-  "app": "npx ts-node --prefer-ts-exts bin/wire.ts",
+{  "app": "npx ts-node --prefer-ts-exts cdk/app.ts",
   "watch": {
     "include": [
       "**"
@@ -87,5 +86,6 @@
     "@aws-cdk/aws-s3:setUniqueReplicationRoleName": true,
     "@aws-cdk/aws-events:requireEventBusPolicySid": true,
     "@aws-cdk/aws-dynamodb:retainTableReplica": true
-  }
+  },
+  "new UIStack(app, 'UIStack');": {}
 }

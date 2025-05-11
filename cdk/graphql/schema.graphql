@@ -1,0 +1,63 @@
+type Query {
+  getUserDevices: [Device] @aws_lambda
+  getDeviceStatus(deviceId: ID!): DeviceStatus @aws_lambda
+  getUIPage(pageId: ID!): UIPage @aws_lambda
+  getUiPage(id: ID!): UiPage
+  getAnalytics(id: ID!): AnalyticsData
+}
+
+type Mutation {
+  controlDevice(deviceId: ID!, action: String!): DeviceStatus @aws_lambda
+  publishMessageToTopic(topic: String!, message: String!): MQTTResponse @aws_lambda
+}
+
+type Subscription {
+  onDeviceStatusUpdate(deviceId: ID!): DeviceStatus
+    @aws_subscribe(mutations: ["controlDevice"])
+  onDeviceStateChange(deviceId: ID!): DeviceStatus
+    @aws_subscribe(mutations: ["controlDevice"])
+}
+
+type Device {
+  id: ID!
+  name: String!
+  type: String!
+  status: String
+}
+
+type DeviceStatus {
+  deviceId: ID!
+  status: String
+  timestamp: AWSDateTime
+}
+
+type UIPage {
+  pageId: ID!
+  title: String!
+  layoutJson: String!
+}
+
+type UiPage {
+  id: ID!
+  title: String
+  content: String
+}
+
+type DeviceCommandResponse {
+  success: Boolean!
+  message: String
+}
+
+type MQTTResponse {
+  success: Boolean!
+  topic: String!
+  message: String!
+}
+
+type AnalyticsData {
+  id: ID!
+  metrics: String
+  timestamp: AWSDateTime
+}
+
+scalar AWSDateTime
