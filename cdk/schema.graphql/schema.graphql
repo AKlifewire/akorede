@@ -12,16 +12,7 @@ type Mutation {
   deleteDevice(id: ID!): Boolean
 }
 
-type Subscription {
-  onDeviceStateChange(deviceId: String!): CommandResponse
-    @aws_subscribe(mutations: ["controlDevice"])
-}
 
-type DeviceStateChange {
-  deviceId: String!
-  state: DeviceState
-  timestamp: String
-}
 
 type UIPageResponse {
   success: Boolean!
@@ -88,5 +79,4 @@ input DeviceStateInput {
 schema {
   query: Query
   mutation: Mutation
-  subscription: Subscription
 }

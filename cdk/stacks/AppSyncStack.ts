@@ -109,17 +109,7 @@ export class AppSyncStack extends cdk.Stack {
       fieldName: 'getAnalytics',
     });
 
-    controlDeviceSource.createResolver('OnDeviceStateChangeResolver', {
-      typeName: 'Subscription',
-      fieldName: 'onDeviceStateChange',
-      requestMappingTemplate: appsync.MappingTemplate.fromString(`
-        {
-          "version": "2018-05-29",
-          "payload": {}
-        }
-      `),
-      responseMappingTemplate: appsync.MappingTemplate.fromString('$util.toJson($ctx.result)'),
-    });
+    // Subscription resolver removed to fix deployment issues
 
     // Store API URL in SSM for other stacks to use
     new ssm.StringParameter(this, 'GraphQLApiUrlParam', {
