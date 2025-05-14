@@ -77,7 +77,7 @@ export class AppSyncStack extends cdk.Stack {
     // AppSync GraphQL API
     const api = new appsync.GraphqlApi(this, 'GraphqlApi', {
       name: 'AKSmartHomeAPI',
-      schema: appsync.SchemaFile.fromAsset('cdk/schema.graphql/simple-schema.graphql'),
+      schema: appsync.SchemaFile.fromAsset('cdk/schema.graphql/schema.graphql'),
       authorizationConfig: {
         defaultAuthorization: {
           authorizationType: appsync.AuthorizationType.API_KEY,
