@@ -1,0 +1,52 @@
+name: Deploy Flutter Web App
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'flutter_app/**'
+      - 'flutter_web_app/**'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.16.5'
+          channel: 'stable'
+
+      - name: Install Flutter dependencies
+        run: |
+          cd flutter_web_app
+          flutter pub get
+
+      - name: Build Flutter web
+        run: |
+          cd flutter_web_app
+          flutter build web --release
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Deploy to S3/Amplify
+        run: |
+          # Get the Amplify app ID from SSM Parameter Store
+          AMPLIFY_APP_ID=$(aws ssm get-parameter --name "/amplify/appId" --query "Parameter.Value" --output text)
+          
+          # Install Amplify CLI
+          npm install -g @aws-amplify/cli
+          
+          # Deploy to Amplify Hosting
+          cd flutter_web_app/build/web
+          amplify hosting publish --appId $AMPLIFY_APP_ID --branch main

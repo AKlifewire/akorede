@@ -1,0 +1,66 @@
+name: Deploy Smart Home Platform
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install CDK dependencies
+        run: cd cdk && npm ci
+      
+      - name: Install AWS Amplify Alpha package
+        run: npm install @aws-cdk/aws-amplify-alpha
+
+      - name: Copy schema.graphql to CDK directory
+        run: cp schema.graphql cdk/schema.graphql
+
+      - name: Build TypeScript
+        run: npm run build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Bootstrap CDK
+        run: npx cdk bootstrap
+
+      - name: Deploy AuthStack
+        run: npx cdk deploy AuthStack --require-approval never
+      
+      - name: Deploy SSMParameterStack
+        run: npx cdk deploy SSMParameterStack --require-approval never
+      
+      - name: Deploy UIStack
+        run: npx cdk deploy UIStack --require-approval never
+      
+      - name: Deploy IoTStack
+        run: npx cdk deploy IoTStack --require-approval never
+      
+      - name: Deploy LambdaStack
+        run: npx cdk deploy LambdaStack --require-approval never
+      
+      - name: Deploy AppSyncStack
+        run: npx cdk deploy AppSyncStack --require-approval never
+      
+      - name: Deploy AmplifyHostingStack
+        run: npx cdk deploy AmplifyHostingStack --require-approval never

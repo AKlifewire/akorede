@@ -1,81 +1,92 @@
-# Smart Home Platform Deployment
+# Smart Home Platform
 
-This repository contains the infrastructure code for the Smart Home platform using AWS CDK.
+A serverless IoT platform for smart home automation built with AWS CDK.
 
-## Deployment Order
+## Architecture
 
-The stacks are deployed in the following order:
+This project uses:
+- AWS CDK for infrastructure as code
+- AWS AppSync for GraphQL API
+- AWS IoT Core for device connectivity
+- AWS Cognito for authentication
+- AWS Amplify for web hosting
+- Flutter for mobile and web applications
 
-1. AuthStack
-2. SSMParameterStack
-3. UIStack
-4. IoTStack
-5. LambdaStack
-6. AppSyncStack
-7. AmplifyHostingStack
+## Deployment with GitHub Actions
 
-## Deployment Instructions
+The project is deployed using GitHub Actions. Three workflows are available:
+
+1. **deploy-cdk.yml**: Deploys all CDK stacks
+2. **deploy-flutter.yml**: Deploys the Flutter web application
+3. **test-app.yml**: Tests the deployed infrastructure
 
 ### Prerequisites
 
-- AWS CLI installed and configured
-- Node.js and npm installed
-- AWS CDK installed globally (`npm install -g aws-cdk`)
+To deploy this project, you need to:
 
-### Deployment Steps
-
-#### Windows
-
-Run the deployment script:
-
-```
-deploy.bat
-```
-
-#### Linux/macOS
-
-Run the deployment script:
-
-```
-./deploy.sh
-```
+1. Fork this repository
+2. Add the following secrets to your GitHub repository:
+   - `AWS_ACCESS_KEY_ID`: Your AWS access key
+   - `AWS_SECRET_ACCESS_KEY`: Your AWS secret key
 
 ### Manual Deployment
 
 If you prefer to deploy manually:
 
-1. Install dependencies:
-   ```
-   npm install
-   ```
+```bash
+# Install dependencies
+npm install
 
-2. Build the project:
-   ```
-   npm run build
-   ```
+# Build the project
+npm run build
 
-3. Bootstrap CDK (if not already done):
-   ```
-   cdk bootstrap
-   ```
+# Deploy all stacks
+npm run deploy
 
-4. Deploy the CodePipeline stack:
-   ```
-   cdk deploy CodePipelineStack
-   ```
+# Test the deployment
+npm run test:app
+```
 
-5. The CodePipeline will automatically deploy the remaining stacks in the correct order.
+## Development
 
-## Monitoring Deployment
+### Local Setup
 
-- You can monitor the deployment in the AWS CodePipeline console
-- Email notifications will be sent for deployment events
-- CloudWatch alarms are configured to alert on pipeline failures
+```bash
+# Install dependencies
+npm install
+cd cdk && npm install
 
-## Troubleshooting
+# Build the project
+npm run build
 
-If deployment fails:
+# Run tests
+npm test
+```
 
-1. Check the CloudWatch logs for the specific stack that failed
-2. Review the SNS notifications for error details
-3. Fix the issues and restart the pipeline or deploy the specific stack manually
+### Flutter Development
+
+```bash
+cd flutter_app
+flutter pub get
+flutter run
+```
+
+## Testing
+
+To test the deployed infrastructure:
+
+```bash
+# Run the test script
+npm run test:app
+```
+
+This will check:
+- Cognito User Pool
+- AppSync API
+- IoT Core
+- Lambda Functions
+- Amplify Hosting
+
+## License
+
+MIT

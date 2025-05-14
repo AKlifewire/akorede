@@ -32,19 +32,8 @@ npm run build
 echo "Bootstrapping CDK environment..."
 cdk bootstrap
 
-# Deploy the CodePipeline stack first
-echo "Deploying CodePipelineStack..."
-cdk deploy CodePipelineStack --require-approval never
+# Deploy all stacks
+echo "Deploying all stacks..."
+cdk deploy --all --require-approval never
 
-echo "=== Deployment initiated ==="
-echo "The CodePipeline has been deployed and will automatically deploy the remaining stacks in this order:"
-echo "1. AuthStack"
-echo "2. SSMParameterStack"
-echo "3. UIStack"
-echo "4. IoTStack"
-echo "5. LambdaStack"
-echo "6. AppSyncStack"
-echo "7. AmplifyHostingStack"
-echo ""
-echo "You can monitor the deployment in the AWS CodePipeline console."
-echo "You will receive email notifications for deployment events."
+echo "=== Deployment Complete ==="

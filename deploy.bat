@@ -36,19 +36,8 @@ REM Bootstrap CDK (if needed)
 echo Bootstrapping CDK environment...
 call cdk bootstrap
 
-REM Deploy the CodePipeline stack first
-echo Deploying CodePipelineStack...
-call cdk deploy CodePipelineStack --require-approval never
+REM Deploy all stacks
+echo Deploying all stacks...
+call cdk deploy --all --require-approval never
 
-echo === Deployment initiated ===
-echo The CodePipeline has been deployed and will automatically deploy the remaining stacks in this order:
-echo 1. AuthStack
-echo 2. SSMParameterStack
-echo 3. UIStack
-echo 4. IoTStack
-echo 5. LambdaStack
-echo 6. AppSyncStack
-echo 7. AmplifyHostingStack
-echo.
-echo You can monitor the deployment in the AWS CodePipeline console.
-echo You will receive email notifications for deployment events.
+echo === Deployment Complete ===

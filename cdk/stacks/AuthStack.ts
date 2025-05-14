@@ -1,6 +1,7 @@
 import { Stack, StackProps, Duration, CfnOutput } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
+import * as ssm from 'aws-cdk-lib/aws-ssm';
 
 interface AuthStackProps extends StackProps {
   appName: string;
@@ -45,7 +46,23 @@ export class AuthStack extends Stack {
       ],
     });
 
-    // Outputs for downstream usage or SSM auto-publishing
+    // Store in SSM for other stacks to use
+    new ssm.StringParameter(this, 'UserPoolIdParam', {
+      parameterName: '/auth/userPoolId',
+      stringValue: userPool.userPoolId,
+    });
+
+    new ssm.StringParameter(this, 'UserPoolClientIdParam', {
+      parameterName: '/auth/userPoolClientId',
+      stringValue: userPoolClient.userPoolClientId,
+    });
+
+    new ssm.StringParameter(this, 'IdentityPoolIdParam', {
+      parameterName: '/auth/identityPoolId',
+      stringValue: identityPool.ref,
+    });
+
+    // Outputs for downstream usage
     new CfnOutput(this, 'UserPoolId', {
       value: userPool.userPoolId,
     });
@@ -58,7 +75,7 @@ export class AuthStack extends Stack {
       value: identityPool.ref,
     });
 
-    // Expose for other stacks (e.g., AppSync)
+    // Expose for other stacks
     this.userPool = userPool;
     this.userPoolClient = userPoolClient;
     this.identityPool = identityPool;

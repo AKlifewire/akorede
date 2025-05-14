@@ -1,0 +1,12 @@
+# These owners will be the default owners for everything in the repo
+* @AKlifewire
+
+# GitHub Actions workflows
+/.github/workflows/ @AKlifewire
+
+# CDK infrastructure
+/cdk/ @AKlifewire
+
+# Flutter application
+/flutter_app/ @AKlifewire
+/flutter_web_app/ @AKlifewire

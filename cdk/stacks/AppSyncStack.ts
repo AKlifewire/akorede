@@ -9,53 +9,84 @@ export class AppSyncStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // Retrieve Cognito resources from SSM
-    const userPoolId = ssm.StringParameter.valueForStringParameter(this, '/auth/userPoolId');
-    const identityPoolId = ssm.StringParameter.valueForStringParameter(this, '/auth/identityPoolId');
+    // Create mock Lambda functions for development
+    // In production, these would be imported from SSM parameters
+    const getUIPageFn = new lambda.Function(this, 'GetUIPageFunction', {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: 'get-ui-page.handler',
+      code: lambda.Code.fromInline(`
+        exports.handler = async (event) => {
+          console.log('GetUIPage event:', JSON.stringify(event));
+          return {
+            success: true,
+            data: { title: "Example UI Page" }
+          };
+        };
+      `),
+    });
 
-    // Retrieve existing Lambda functions (from LambdaStack)
-    const getUIPageFn = lambda.Function.fromFunctionArn(
-      this,
-      'GetUIPageFn',
-      ssm.StringParameter.valueForStringParameter(this, '/lambda/get-ui-page-arn')
-    );
+    const controlDeviceFn = new lambda.Function(this, 'ControlDeviceFunction', {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: 'control-device.handler',
+      code: lambda.Code.fromInline(`
+        exports.handler = async (event) => {
+          console.log('ControlDevice event:', JSON.stringify(event));
+          return {
+            success: true,
+            message: "Command sent to device"
+          };
+        };
+      `),
+    });
 
-    const controlDeviceFn = lambda.Function.fromFunctionArn(
-      this,
-      'ControlDeviceFn',
-      ssm.StringParameter.valueForStringParameter(this, '/lambda/control-device-arn')
-    );
+    const getAnalyticsFn = new lambda.Function(this, 'GetAnalyticsFunction', {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: 'get-analytics.handler',
+      code: lambda.Code.fromInline(`
+        exports.handler = async (event) => {
+          console.log('GetAnalytics event:', JSON.stringify(event));
+          return {
+            success: true,
+            data: { metrics: [{ date: "2025-05-14", value: 42 }] }
+          };
+        };
+      `),
+    });
 
-    const getAnalyticsFn = lambda.Function.fromFunctionArn(
-      this,
-      'GetAnalyticsFn',
-      ssm.StringParameter.valueForStringParameter(this, '/lambda/get-analytics-arn')
-    );
+    // Store Lambda ARNs in SSM for other stacks to use
+    new ssm.StringParameter(this, 'GetUIPageArnParam', {
+      parameterName: '/lambda/get-ui-page-arn',
+      stringValue: getUIPageFn.functionArn,
+    });
+
+    new ssm.StringParameter(this, 'ControlDeviceArnParam', {
+      parameterName: '/lambda/control-device-arn',
+      stringValue: controlDeviceFn.functionArn,
+    });
+
+    new ssm.StringParameter(this, 'GetAnalyticsArnParam', {
+      parameterName: '/lambda/get-analytics-arn',
+      stringValue: getAnalyticsFn.functionArn,
+    });
 
     // AppSync GraphQL API
     const api = new appsync.GraphqlApi(this, 'GraphqlApi', {
-      name: 'MyApi',
-      definition: appsync.Definition.fromFile('schema.graphql'), // Ensure this path is correct
+      name: 'SmartHomeAPI',
+      schema: appsync.SchemaFile.fromAsset('schema.graphql'),
+      authorizationConfig: {
+        defaultAuthorization: {
+          authorizationType: appsync.AuthorizationType.API_KEY,
+          apiKeyConfig: {
+            expires: cdk.Expiration.after(cdk.Duration.days(365))
+          }
+        }
+      }
     });
 
     // Lambda data sources
     const getUIPageSource = api.addLambdaDataSource('GetUIPageSource', getUIPageFn);
-    getUIPageSource.grantPrincipal.addToPrincipalPolicy(new iam.PolicyStatement({
-      actions: ['lambda:InvokeFunction'],
-      resources: [getUIPageFn.functionArn], // Use the exact ARN
-    }));
-
     const controlDeviceSource = api.addLambdaDataSource('ControlDeviceSource', controlDeviceFn);
-    controlDeviceSource.grantPrincipal.addToPrincipalPolicy(new iam.PolicyStatement({
-      actions: ['lambda:InvokeFunction'],
-      resources: [controlDeviceFn.functionArn], // Use the exact ARN
-    }));
-
     const getAnalyticsSource = api.addLambdaDataSource('GetAnalyticsSource', getAnalyticsFn);
-    getAnalyticsSource.grantPrincipal.addToPrincipalPolicy(new iam.PolicyStatement({
-      actions: ['lambda:InvokeFunction'],
-      resources: [getAnalyticsFn.functionArn], // Use the exact ARN
-    }));
 
     // Resolver bindings
     getUIPageSource.createResolver('GetUIPageResolver', {
@@ -92,6 +123,10 @@ export class AppSyncStack extends cdk.Stack {
 
     new cdk.CfnOutput(this, 'GraphQLApiId', {
       value: api.apiId,
+    });
+
+    new cdk.CfnOutput(this, 'GraphQLApiKey', {
+      value: api.apiKey || 'No API Key defined',
     });
   }
 }

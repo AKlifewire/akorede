@@ -1,8 +1,45 @@
-*.js
-!jest.config.js
-*.d.ts
-node_modules
-
 # CDK asset staging directory
 .cdk.staging
 cdk.out
+custom-cdk.out
+
+# Node.js dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+
+# TypeScript compiled files
+dist
+*.js
+*.d.ts
+!jest.config.js
+
+# IDE files
+.idea
+.vscode
+*.swp
+*.swo
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Flutter/Dart specific
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+*.lock
+*.log
+*.iml
+
+# AWS credentials
+.aws/
+
+# Misc
+.DS_Store
+Thumbs.db
