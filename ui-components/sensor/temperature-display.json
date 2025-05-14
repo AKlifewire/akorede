@@ -1,0 +1,47 @@
+{
+  "componentType": "display",
+  "componentId": "temperature-display",
+  "deviceType": "sensor",
+  "capability": "temperature",
+  "version": "1.0",
+  "uiSection": {
+    "type": "card",
+    "id": "temperature-card",
+    "title": "Temperature",
+    "icon": "thermometer",
+    "content": [
+      {
+        "type": "value",
+        "id": "temperature-value",
+        "value": "{{state.temperature}}",
+        "unit": "°C",
+        "precision": 1,
+        "color": {
+          "ranges": [
+            { "min": 0, "max": 18, "color": "blue" },
+            { "min": 18, "max": 24, "color": "green" },
+            { "min": 24, "max": 100, "color": "red" }
+          ]
+        }
+      },
+      {
+        "type": "chart",
+        "id": "temperature-chart",
+        "dataSource": {
+          "type": "history",
+          "deviceId": "{{deviceId}}",
+          "metric": "temperature",
+          "period": "day"
+        },
+        "chartType": "line",
+        "height": 150
+      }
+    ],
+    "requiredCapability": "temperature"
+  },
+  "metadata": {
+    "description": "Temperature display component for sensor devices",
+    "author": "AK Smart Home",
+    "created": "2023-06-15T12:00:00Z"
+  }
+}

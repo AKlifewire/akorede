@@ -1,0 +1,29 @@
+{
+  "componentType": "control",
+  "componentId": "relay-control",
+  "deviceType": "relay",
+  "capability": "relay",
+  "version": "1.0",
+  "uiControl": {
+    "type": "switch",
+    "id": "relay-switch",
+    "label": "{{relayName}}",
+    "icon": "power",
+    "value": "{{state.relay}}",
+    "onChanged": {
+      "action": "controlDevice",
+      "parameters": {
+        "deviceId": "{{deviceId}}",
+        "command": "setRelay",
+        "value": "{{value}}",
+        "relayId": "{{relayId}}"
+      }
+    },
+    "requiredCapability": "relay"
+  },
+  "metadata": {
+    "description": "Switch control for relay devices",
+    "author": "AK Smart Home",
+    "created": "2023-06-15T12:00:00Z"
+  }
+}

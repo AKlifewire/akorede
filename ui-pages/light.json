@@ -1,0 +1,87 @@
+{
+  "sections": [
+    {
+      "id": "main",
+      "title": "{{deviceName}}",
+      "type": "card",
+      "controls": ["power", "brightness", "colorTemp"]
+    },
+    {
+      "id": "color",
+      "title": "Color",
+      "type": "card",
+      "controls": ["colorPicker"],
+      "requiredCapability": "color"
+    },
+    {
+      "id": "details",
+      "title": "Device Details",
+      "type": "card",
+      "controls": ["info"]
+    }
+  ],
+  "controls": [
+    {
+      "id": "power",
+      "type": "switch",
+      "label": "Power",
+      "command": "power",
+      "valueKey": "power",
+      "trueValue": true,
+      "falseValue": false
+    },
+    {
+      "id": "brightness",
+      "type": "slider",
+      "label": "Brightness",
+      "command": "brightness",
+      "valueKey": "brightness",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%"
+    },
+    {
+      "id": "colorTemp",
+      "type": "slider",
+      "label": "Color Temperature",
+      "command": "colorTemp",
+      "valueKey": "colorTemp",
+      "min": 2700,
+      "max": 6500,
+      "step": 100,
+      "unit": "K",
+      "requiredCapability": "colorTemp"
+    },
+    {
+      "id": "colorPicker",
+      "type": "colorPicker",
+      "label": "Color",
+      "command": "color",
+      "valueKey": "color",
+      "requiredCapability": "color"
+    },
+    {
+      "id": "info",
+      "type": "info",
+      "items": [
+        {
+          "label": "Device ID",
+          "value": "{{deviceId}}"
+        },
+        {
+          "label": "Model",
+          "value": "{{deviceModel}}"
+        },
+        {
+          "label": "Manufacturer",
+          "value": "{{deviceManufacturer}}"
+        },
+        {
+          "label": "Room",
+          "value": "{{deviceRoom}}"
+        }
+      ]
+    }
+  ]
+}

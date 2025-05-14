@@ -1,0 +1,123 @@
+name: IoT Stack Validation
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'cdk/stacks/IoTStack.ts'
+      - 'lambdas/iot/**'
+  workflow_dispatch:
+
+env:
+  AWS_REGION: us-east-1
+  NODE_VERSION: '18'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build TypeScript
+        run: npm run build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Validate IoT Stack
+        id: validate
+        run: |
+          echo "Running IoT Stack validation..."
+          npx cdk synth IoTStack > iot-stack-template.yaml
+          
+          # Validate IoT policy permissions
+          echo "Validating IoT policy permissions..."
+          if grep -q "iot:*" iot-stack-template.yaml; then
+            echo "::error::Overly permissive IoT policy detected (iot:*). Please restrict permissions."
+            echo "policy_validation=failed" >> $GITHUB_OUTPUT
+          else
+            echo "IoT policy validation passed."
+            echo "policy_validation=passed" >> $GITHUB_OUTPUT
+          fi
+          
+          # Validate IoT rule SQL
+          echo "Validating IoT rule SQL..."
+          if grep -q "SELECT \*" iot-stack-template.yaml; then
+            echo "::warning::Consider using more specific SQL queries in IoT rules instead of 'SELECT *'"
+            echo "rule_sql_validation=warning" >> $GITHUB_OUTPUT
+          else
+            echo "IoT rule SQL validation passed."
+            echo "rule_sql_validation=passed" >> $GITHUB_OUTPUT
+          fi
+          
+          # Check for IoT Defender setup
+          echo "Checking for IoT Defender setup..."
+          if grep -q "SecurityProfile" iot-stack-template.yaml; then
+            echo "IoT Defender validation passed."
+            echo "defender_validation=passed" >> $GITHUB_OUTPUT
+          else
+            echo "::warning::IoT Defender not configured. Consider adding security profiles."
+            echo "defender_validation=warning" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const policyValidation = '${{ steps.validate.outputs.policy_validation }}';
+            const ruleSqlValidation = '${{ steps.validate.outputs.rule_sql_validation }}';
+            const defenderValidation = '${{ steps.validate.outputs.defender_validation }}';
+            
+            let body = '## IoT Stack Validation Results\n\n';
+            
+            if (policyValidation === 'passed') {
+              body += '✅ **IoT Policy**: Permissions are properly scoped\n\n';
+            } else {
+              body += '❌ **IoT Policy**: Overly permissive policies detected. Please restrict permissions.\n\n';
+            }
+            
+            if (ruleSqlValidation === 'passed') {
+              body += '✅ **IoT Rules**: SQL queries are properly scoped\n\n';
+            } else {
+              body += '⚠️ **IoT Rules**: Consider using more specific SQL queries instead of `SELECT *`\n\n';
+            }
+            
+            if (defenderValidation === 'passed') {
+              body += '✅ **IoT Defender**: Security profiles are configured\n\n';
+            } else {
+              body += '⚠️ **IoT Defender**: Not configured. Consider adding security profiles.\n\n';
+            }
+            
+            body += '---\n*This is an automated validation. Please review the recommendations.*';
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
+      - name: Fail if policy validation failed
+        if: steps.validate.outputs.policy_validation == 'failed'
+        run: exit 1

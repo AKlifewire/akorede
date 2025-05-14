@@ -1,0 +1,25 @@
+{
+  "name": "ak-smart-home-device-simulator",
+  "version": "1.0.0",
+  "description": "Device simulator for AK Smart Home Platform",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "simulate-light": "node index.js --type light --name \"Living Room Light\"",
+    "simulate-thermostat": "node index.js --type thermostat --name \"Bedroom Thermostat\"",
+    "simulate-switch": "node index.js --type switch --name \"Kitchen Switch\"",
+    "create-cert": "node create-device-certificate.js",
+    "register": "node register-device.js",
+    "send-command": "node test-command.js",
+    "monitor": "node monitor-devices.js",
+    "setup": "npm install && node create-device-certificate.js && node register-device.js"
+  },
+  "dependencies": {
+    "aws-iot-device-sdk": "^2.2.12",
+    "aws-sdk": "^2.1310.0",
+    "commander": "^9.4.1",
+    "dotenv": "^16.0.3",
+    "mqtt": "^4.3.7",
+    "uuid": "^9.0.0"
+  }
+}

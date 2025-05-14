@@ -1,0 +1,60 @@
+name: wire_iot_platform
+description: A Flutter application for the Wire IoT Platform using AWS CDK backend.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.17.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.5
+  
+  # AWS Amplify - Web compatible versions
+  
+  # State management
+  provider: ^6.0.5
+  
+  # UI
+  flutter_svg: ^2.0.5
+  cached_network_image: ^3.2.3
+  shimmer: ^3.0.0
+  
+  # Utils
+  intl: ^0.18.1
+  uuid: ^3.0.7
+  logger: ^1.4.0
+  shared_preferences: ^2.1.1
+  
+  # Connectivity
+  connectivity_plus: ^4.0.1
+  mqtt_client: ^9.8.1
+  
+  # Charts
+  fl_chart: ^0.63.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.1
+  build_runner: ^2.4.5
+  mockito: ^5.4.2
+
+flutter:
+  uses-material-design: true
+  
+  # Comment out fonts until you have the actual files
+  # fonts:
+  #   - family: Poppins
+  #     fonts:
+  #       - asset: assets/fonts/Poppins-Regular.ttf
+  #       - asset: assets/fonts/Poppins-Medium.ttf
+  #         weight: 500
+  #       - asset: assets/fonts/Poppins-Bold.ttf
+  #         weight: 700
+  
+  # Make sure assets directories exist
+  assets:
+    - assets/images/
+    - assets/icons/

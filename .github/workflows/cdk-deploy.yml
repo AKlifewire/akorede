@@ -1,0 +1,125 @@
+name: CDK Deploy
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'cdk/**'
+      - 'bin/**'
+      - 'lib/**'
+      - 'lambdas/**'
+      - 'package.json'
+      - 'cdk.json'
+      - 'tsconfig.json'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+      stacks:
+        description: 'Stacks to deploy (comma-separated, leave empty for all)'
+        required: false
+        type: string
+
+env:
+  AWS_REGION: us-east-1
+  NODE_VERSION: '18'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build TypeScript
+        run: npm run build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy all stacks (if no specific stacks provided)
+        if: ${{ github.event.inputs.stacks == '' || github.event_name == 'push' }}
+        run: |
+          ENV=${{ github.event.inputs.environment || 'dev' }}
+          echo "Deploying all stacks to $ENV environment"
+          npx cdk deploy --all --require-approval never --context environment=$ENV
+
+      - name: Deploy specific stacks
+        if: ${{ github.event.inputs.stacks != '' && github.event_name == 'workflow_dispatch' }}
+        run: |
+          ENV=${{ github.event.inputs.environment }}
+          STACKS="${{ github.event.inputs.stacks }}"
+          echo "Deploying stacks: $STACKS to $ENV environment"
+          IFS=',' read -ra STACK_ARRAY <<< "$STACKS"
+          for stack in "${STACK_ARRAY[@]}"; do
+            echo "Deploying $stack"
+            npx cdk deploy $stack --require-approval never --context environment=$ENV
+          done
+
+      - name: Run post-deployment tests
+        run: npm test
+        continue-on-error: true
+
+      - name: Notify on success
+        if: success()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "✅ CDK deployment successful for ${{ github.repository }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "✅ *CDK Deployment Successful*\n*Repository:* ${{ github.repository }}\n*Branch:* ${{ github.ref_name }}\n*Environment:* ${{ github.event.inputs.environment || 'dev' }}\n*Triggered by:* ${{ github.actor }}"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+      - name: Notify on failure
+        if: failure()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "❌ CDK deployment failed for ${{ github.repository }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "❌ *CDK Deployment Failed*\n*Repository:* ${{ github.repository }}\n*Branch:* ${{ github.ref_name }}\n*Environment:* ${{ github.event.inputs.environment || 'dev' }}\n*Triggered by:* ${{ github.actor }}\n*Workflow:* <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Logs>"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK

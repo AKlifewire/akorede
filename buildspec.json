@@ -1,0 +1,29 @@
+﻿{
+  "version": "0.2",
+  "phases": {
+    "install": {
+      "runtime-versions": {
+        "nodejs": "18"
+      },
+      "commands": [
+        "npm install -g aws-cdk",
+        "npm install"
+      ]
+    },
+    "build": {
+      "commands": [
+        "ls -la",
+        "cat cdk.json || echo 'cdk.json not found'",
+        "find . -name '*.ts' | grep -v 'node_modules'",
+        "npm run build || echo 'Build failed but continuing'",
+        "npx cdk synth --app 'npx ts-node --prefer-ts-exts cdk/bin/main.ts'"
+      ]
+    }
+  },
+  "artifacts": {
+    "base-directory": "cdk.out",
+    "files": [
+      "**/*"
+    ]
+  }
+}

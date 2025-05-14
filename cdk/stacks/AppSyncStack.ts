@@ -33,18 +33,9 @@ export class AppSyncStack extends cdk.Stack {
     );
 
     // AppSync GraphQL API
-    const api = new appsync.GraphqlApi(this, 'SmartHomeApi', {
-      name: 'SmartHomeGraphQL',
-      schema: appsync.SchemaFile.fromAsset('cdk/graphql/schema.graphql'),
-      authorizationConfig: {
-        defaultAuthorization: {
-          authorizationType: appsync.AuthorizationType.USER_POOL,
-          userPoolConfig: {
-            userPool: cdk.aws_cognito.UserPool.fromUserPoolId(this, 'UserPool', userPoolId),
-          },
-        },
-      },
-      xrayEnabled: true,
+    const api = new appsync.GraphqlApi(this, 'GraphqlApi', {
+      name: 'MyApi',
+      definition: appsync.Definition.fromFile('schema.graphql'), // Ensure this path is correct
     });
 
     // Lambda data sources

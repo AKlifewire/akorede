@@ -1,0 +1,55 @@
+{
+  "componentType": "display",
+  "componentId": "camera-view",
+  "deviceType": "camera",
+  "capability": "camera",
+  "version": "1.0",
+  "uiSection": {
+    "type": "card",
+    "id": "camera-card",
+    "title": "{{cameraName}}",
+    "icon": "camera",
+    "fullWidth": true,
+    "content": [
+      {
+        "type": "camera",
+        "id": "camera-stream",
+        "streamUrl": "{{state.streamUrl}}",
+        "snapshotUrl": "{{state.snapshotUrl}}",
+        "aspectRatio": "16:9",
+        "controls": [
+          {
+            "type": "button",
+            "id": "snapshot-button",
+            "icon": "photo",
+            "onPressed": {
+              "action": "takeSnapshot",
+              "parameters": {
+                "deviceId": "{{deviceId}}",
+                "cameraId": "{{cameraId}}"
+              }
+            }
+          },
+          {
+            "type": "button",
+            "id": "record-button",
+            "icon": "videocam",
+            "onPressed": {
+              "action": "toggleRecording",
+              "parameters": {
+                "deviceId": "{{deviceId}}",
+                "cameraId": "{{cameraId}}"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "requiredCapability": "camera"
+  },
+  "metadata": {
+    "description": "Camera view component for camera devices",
+    "author": "AK Smart Home",
+    "created": "2023-06-15T12:00:00Z"
+  }
+}
