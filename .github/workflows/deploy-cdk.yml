@@ -48,5 +48,8 @@ jobs:
       - name: Bootstrap CDK
         run: npx cdk bootstrap
 
-      - name: Deploy all stacks
-        run: npx cdk deploy --all --require-approval never
+      - name: Check stack status
+        run: node check-stacks.js
+
+      - name: Deploy stacks sequentially
+        run: node deploy-sequential.js
