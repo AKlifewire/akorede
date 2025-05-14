@@ -27,7 +27,7 @@ export const handler: AppSyncResolverHandler<ControlDeviceEvent, CommandResponse
 
   // Simulate a device state change
   const deviceStatus = {
-    deviceId: event.deviceId,
+    deviceId: event.arguments.deviceId,
     status: "ON",
     timestamp: new Date().toISOString()
   };
