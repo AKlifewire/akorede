@@ -26,10 +26,12 @@ jobs:
         run: cd cdk && npm ci
       
       - name: Install AWS Amplify Alpha package
-        run: npm install @aws-cdk/aws-amplify-alpha
+        run: |
+          npm install @aws-cdk/aws-amplify-alpha
+          cd cdk && npm install @aws-cdk/aws-amplify-alpha
 
       - name: Copy schema.graphql to CDK directory
-        run: cp schema.graphql cdk/schema.graphql
+        run: mkdir -p cdk/schema.graphql && cp schema.graphql cdk/schema.graphql/
 
       - name: Build TypeScript
         run: npm run build
@@ -44,23 +46,5 @@ jobs:
       - name: Bootstrap CDK
         run: npx cdk bootstrap
 
-      - name: Deploy AuthStack
-        run: npx cdk deploy AuthStack --require-approval never
-      
-      - name: Deploy SSMParameterStack
-        run: npx cdk deploy SSMParameterStack --require-approval never
-      
-      - name: Deploy UIStack
-        run: npx cdk deploy UIStack --require-approval never
-      
-      - name: Deploy IoTStack
-        run: npx cdk deploy IoTStack --require-approval never
-      
-      - name: Deploy LambdaStack
-        run: npx cdk deploy LambdaStack --require-approval never
-      
-      - name: Deploy AppSyncStack
-        run: npx cdk deploy AppSyncStack --require-approval never
-      
-      - name: Deploy AmplifyHostingStack
-        run: npx cdk deploy AmplifyHostingStack --require-approval never
+      - name: Deploy all stacks
+        run: npx cdk deploy --all --require-approval never
