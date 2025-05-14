@@ -16,7 +16,7 @@ cd ..
 REM Copy schema.graphql to CDK directory
 echo Copying schema.graphql to CDK directory...
 if not exist cdk\schema.graphql mkdir cdk\schema.graphql
-copy schema.graphql cdk\schema.graphql\
+copy schema.graphql cdk\schema.graphql\schema.graphql
 
 REM Build the project
 echo Building the project...

@@ -18,7 +18,7 @@ cd ..
 # Copy schema.graphql to CDK directory
 echo "Copying schema.graphql to CDK directory..."
 mkdir -p cdk/schema.graphql
-cp schema.graphql cdk/schema.graphql/
+cp schema.graphql cdk/schema.graphql/schema.graphql
 
 # Build the project
 echo "Building the project..."
