@@ -30,8 +30,10 @@ jobs:
           npm install @aws-cdk/aws-amplify-alpha
           cd cdk && npm install @aws-cdk/aws-amplify-alpha
 
-      - name: Copy schema.graphql to CDK directory
-        run: mkdir -p cdk/schema.graphql && cp schema.graphql cdk/schema.graphql/
+      - name: Prepare schema.graphql
+        run: |
+          mkdir -p cdk/schema.graphql
+          cp schema.graphql cdk/schema.graphql/schema.graphql
 
       - name: Build TypeScript
         run: npm run build

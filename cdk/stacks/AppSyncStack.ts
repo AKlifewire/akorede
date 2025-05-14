@@ -4,6 +4,8 @@ import * as appsync from 'aws-cdk-lib/aws-appsync';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
+import * as fs from 'fs';
+import * as path from 'path';
 
 export class AppSyncStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -75,7 +77,7 @@ export class AppSyncStack extends cdk.Stack {
     // AppSync GraphQL API
     const api = new appsync.GraphqlApi(this, 'GraphqlApi', {
       name: 'AKSmartHomeAPI',
-      schema: appsync.Schema.fromAsset('cdk/schema.graphql/schema.graphql'),
+      schema: appsync.SchemaFile.fromAsset('cdk/schema.graphql/schema.graphql'),
       authorizationConfig: {
         defaultAuthorization: {
           authorizationType: appsync.AuthorizationType.API_KEY,
