@@ -1,0 +1,92 @@
+type Query {
+  getUiPage(pageName: String!, deviceType: String, userRole: String): UIPageResponse!
+  getAnalytics(deviceId: String!, timeRange: String!): AnalyticsResponse!
+  getDevices(filter: DeviceFilterInput): [Device]
+  getDevice(id: ID!): Device
+}
+
+type Mutation {
+  controlDevice(deviceId: String!, command: String!, value: String!): CommandResponse!
+  registerDevice(input: RegisterDeviceInput!): Device
+  updateDevice(input: UpdateDeviceInput!): Device
+  deleteDevice(id: ID!): Boolean
+}
+
+type Subscription {
+  onDeviceStateChange(deviceId: String!): CommandResponse
+    @aws_subscribe(mutations: ["controlDevice"])
+}
+
+type DeviceStateChange {
+  deviceId: String!
+  state: DeviceState
+  timestamp: String
+}
+
+type UIPageResponse {
+  success: Boolean!
+  message: String
+  data: AWSJSON
+}
+
+type CommandResponse {
+  success: Boolean!
+  message: String
+  data: AWSJSON
+}
+
+type AnalyticsResponse {
+  success: Boolean!
+  message: String
+  data: AWSJSON
+}
+
+type Device {
+  id: ID!
+  name: String!
+  type: String!
+  ownerId: String!
+  state: DeviceState
+  createdAt: String!
+  updatedAt: String!
+}
+
+type DeviceState {
+  power: String
+  brightness: Int
+  temperature: Float
+  humidity: Float
+  motion: Boolean
+  lastUpdated: String
+}
+
+input DeviceFilterInput {
+  type: String
+  ownerId: String
+}
+
+input RegisterDeviceInput {
+  name: String!
+  type: String!
+  initialState: DeviceStateInput
+}
+
+input UpdateDeviceInput {
+  id: ID!
+  name: String
+  state: DeviceStateInput
+}
+
+input DeviceStateInput {
+  power: String
+  brightness: Int
+  temperature: Float
+  humidity: Float
+  motion: Boolean
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}
