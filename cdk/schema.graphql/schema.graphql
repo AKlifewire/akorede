@@ -13,8 +13,14 @@ type Mutation {
 }
 
 type Subscription {
-  onDeviceStateChange(deviceId: String!): DeviceState
+  onDeviceStateChange(deviceId: String!): CommandResponse
     @aws_subscribe(mutations: ["controlDevice"])
+}
+
+type DeviceStateChange {
+  deviceId: String!
+  state: DeviceState
+  timestamp: String
 }
 
 type UIPageResponse {
