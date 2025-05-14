@@ -20,21 +20,23 @@ export class SSMParameterStack extends cdk.Stack {
     const secureKeys = props.secureKeys ?? [];
     const envTag = props.environmentTag ?? 'prod';
 
-    // Create Parameters
+    // Create Parameters with unique names
     Object.entries(props.parameters).forEach(([key, value]) => {
       if (secureKeys.includes(key)) {
         // Create a secure parameter
         new ssm.StringParameter(this, `Param-${key}`, {
-          parameterName: `/${envTag}/${key}`,
+          parameterName: `/${envTag}/${this.stackName}/${key}`,
           stringValue: value,
           tier: ssm.ParameterTier.STANDARD,
+          description: `Secure parameter for ${key}`,
         });
       } else {
         // Create a standard parameter
         new ssm.StringParameter(this, `Param-${key}`, {
-          parameterName: `/${envTag}/${key}`,
+          parameterName: `/${envTag}/${this.stackName}/${key}`,
           stringValue: value,
           tier: ssm.ParameterTier.STANDARD,
+          description: `Parameter for ${key}`,
         });
       }
     });
@@ -49,8 +51,12 @@ export class SSMParameterStack extends cdk.Stack {
           const ssm = new AWS.SSM();
           exports.handler = async function () {
             const env = '${envTag}';
+            const stackName = '${this.stackName}';
             const result = await ssm.describeParameters({}).promise();
-            const toDelete = result.Parameters.filter(p => p.Name.startsWith('/' + env + '/') && p.Tags?.some(tag => tag.Key === 'obsolete'));
+            const toDelete = result.Parameters.filter(p => 
+              p.Name.startsWith('/' + env + '/' + stackName + '/') && 
+              p.Tags?.some(tag => tag.Key === 'obsolete')
+            );
             for (const param of toDelete) {
               await ssm.deleteParameter({ Name: param.Name }).promise();
               console.log('Deleted:', param.Name);
@@ -69,6 +75,8 @@ export class SSMParameterStack extends cdk.Stack {
 
       new cdk.CfnOutput(this, 'CleanupFunctionName', {
         value: cleanupFunction.functionName,
+        description: 'Lambda function to clean up obsolete SSM parameters',
+        exportName: `${this.stackName}-CleanupFunction`,
       });
     }
   }

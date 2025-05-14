@@ -53,26 +53,29 @@ export class AppSyncStack extends cdk.Stack {
       `),
     });
 
-    // Store Lambda ARNs in SSM for other stacks to use
+    // Store Lambda ARNs in SSM for other stacks to use with unique names
     new ssm.StringParameter(this, 'GetUIPageArnParam', {
-      parameterName: '/lambda/get-ui-page-arn',
+      parameterName: `/lambda/${this.stackName}/get-ui-page-arn`,
       stringValue: getUIPageFn.functionArn,
+      description: 'ARN for the GetUIPage Lambda function',
     });
 
     new ssm.StringParameter(this, 'ControlDeviceArnParam', {
-      parameterName: '/lambda/control-device-arn',
+      parameterName: `/lambda/${this.stackName}/control-device-arn`,
       stringValue: controlDeviceFn.functionArn,
+      description: 'ARN for the ControlDevice Lambda function',
     });
 
     new ssm.StringParameter(this, 'GetAnalyticsArnParam', {
-      parameterName: '/lambda/get-analytics-arn',
+      parameterName: `/lambda/${this.stackName}/get-analytics-arn`,
       stringValue: getAnalyticsFn.functionArn,
+      description: 'ARN for the GetAnalytics Lambda function',
     });
 
     // AppSync GraphQL API
     const api = new appsync.GraphqlApi(this, 'GraphqlApi', {
-      name: 'SmartHomeAPI',
-      schema: appsync.SchemaFile.fromAsset('schema.graphql'),
+      name: 'AKSmartHomeAPI',
+      schema: appsync.Schema.fromAsset('cdk/schema.graphql/schema.graphql'),
       authorizationConfig: {
         defaultAuthorization: {
           authorizationType: appsync.AuthorizationType.API_KEY,
@@ -116,17 +119,30 @@ export class AppSyncStack extends cdk.Stack {
       responseMappingTemplate: appsync.MappingTemplate.fromString('$util.toJson($ctx.result)'),
     });
 
+    // Store API URL in SSM for other stacks to use
+    new ssm.StringParameter(this, 'GraphQLApiUrlParam', {
+      parameterName: `/appsync/${this.stackName}/api-url`,
+      stringValue: api.graphqlUrl,
+      description: 'URL for the AppSync GraphQL API',
+    });
+
     // Export GraphQL API URL and key
     new cdk.CfnOutput(this, 'GraphQLApiUrl', {
       value: api.graphqlUrl,
+      description: 'URL for the AppSync GraphQL API',
+      exportName: `${this.stackName}-GraphQLApiUrl`,
     });
 
     new cdk.CfnOutput(this, 'GraphQLApiId', {
       value: api.apiId,
+      description: 'ID of the AppSync GraphQL API',
+      exportName: `${this.stackName}-GraphQLApiId`,
     });
 
     new cdk.CfnOutput(this, 'GraphQLApiKey', {
       value: api.apiKey || 'No API Key defined',
+      description: 'API Key for the AppSync GraphQL API',
+      exportName: `${this.stackName}-GraphQLApiKey`,
     });
   }
 }
